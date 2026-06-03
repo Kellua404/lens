@@ -41,11 +41,16 @@ export async function POST(req: Request) {
 
   try {
     // Dimensions are needed first + cheap; classify and OCR are independent → run in
-    // parallel; palette is cheap CPU and rides along.
+    // parallel; palette is cheap CPU and rides along. OCR is wrapped so a worker hiccup
+    // degrades to an honest "no text" result instead of failing the whole analysis —
+    // classification + palette are the load-bearing outputs.
     const dims = await dimensions(bytes);
     const [cls, read, pal] = await Promise.all([
       classify(bytes),
-      ocr(bytes),
+      ocr(bytes).catch((err) => {
+        console.error("[analyze] ocr failed (continuing without text):", err);
+        return { text: "", words: [], ms: 0 };
+      }),
       palette(bytes),
     ]);
 
