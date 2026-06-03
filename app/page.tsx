@@ -115,7 +115,7 @@ export default function Home() {
             names the image, Tesseract reads its text, and the palette is quantized straight
             from the pixels — no Google/AWS Vision API, no API key, $0.
           </p>
-          <p className="text-text-dim/70">
+          <p className="text-text-dim">
             Processed in-memory on our server. Nothing is stored.
           </p>
         </footer>

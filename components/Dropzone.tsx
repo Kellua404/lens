@@ -97,6 +97,7 @@ export function Dropzone({
         ref={inputRef}
         type="file"
         accept="image/*"
+        aria-label="Upload an image file"
         className="sr-only"
         tabIndex={-1}
         onChange={(e) => {
