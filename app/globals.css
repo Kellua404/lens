@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Lens design tokens (PRODUCT + PLAN §3). A forensic light table in a darkroom:
+   near-black surface, hairline technical grid, one optical-cyan signal. Tailwind v4
+   reads colors/fonts from @theme, so `bg-surface`, `text-text-dim`, `text-scan`,
+   `font-mono` etc. all come from here.
+   ──────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-bg: #07090c; /* near-black darkroom */
+  --color-surface: #0d1014; /* light-table panel */
+  --color-surface-2: #14181e; /* card / readout */
+  --color-line: #20262f; /* hairline grid + borders */
+  --color-text: #eaf0f6; /* primary */
+  --color-text-dim: #828d9b; /* labels, secondary */
+  --color-scan: #38e1d6; /* OPTICAL CYAN — scan line + active accent */
+  --color-ok: #4cc38a; /* high-confidence / success */
+  --color-warn: #e6b450; /* low-confidence hint */
+  --color-err: #e5675b; /* error */
+
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+html {
+  background: var(--color-bg);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular, lab-readout numerals everywhere mono is used. */
+.font-mono,
+[class*="font-mono"] {
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* The hairline technical grid that backs the darkroom (PLAN §3 visual signature).
+   Two faint line sets; sits behind content, never competes with the specimen. */
+.grid-field {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-line) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-line) 55%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Calm optical-cyan focus ring for keyboard users. */
+:where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-scan);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Quiet scrollbar that matches the chrome. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 9999px;
+}
+
+/* The single scan-line sweep on analyze (PLAN §3 motion law / §12). Framer Motion drives
+   the real sweep; this keyframe powers the subtle idle "ready" pulse on the empty table. */
+@keyframes lens-breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+.breathe {
+  animation: lens-breathe 4.5s ease-in-out infinite;
+}
+
+/* A faint scan shimmer used on the warming state. */
+@keyframes lens-sheen {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+.sheen {
+  animation: lens-sheen 1.8s linear infinite;
+}
+
+/* Reduced motion: still precise, just still (PLAN §12/§13). */
+@media (prefers-reduced-motion: reduce) {
+  .breathe,
+  .sheen {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

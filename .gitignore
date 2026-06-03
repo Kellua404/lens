@@ -1,0 +1,47 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# vendored ONNX model — NOT committed (the q8 weights exceed GitHub's 100MB/file limit).
+# Fetched at build time by scripts/fetch-model.mjs (see package.json "build").
+/models
+
+# tessdata — vendored OCR language data. The .gz (~4MB) IS committed (well under 100MB)
+# so the function builds without a network round-trip; it is fetched by the build script
+# only when missing. Do NOT ignore it.
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local-only Claude settings
+.claude/settings.local.json
