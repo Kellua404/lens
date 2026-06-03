@@ -36,9 +36,23 @@ const SHARP = ["./node_modules/sharp/**", "./node_modules/@img/**"];
 // Tesseract.js loads its wasm core + worker from node_modules at runtime, and reads the
 // vendored language data from ./tessdata. None of these are statically imported, so trace
 // them in by hand. (PLAN §5.)
+// Tesseract spawns a worker_threads Worker whose script (worker-script/node/index.js) does
+// its OWN runtime require()s of tesseract.js's transitive deps — wasm-feature-detect (SIMD
+// probe), is-url, zlibjs/bmp-js/regenerator-runtime, etc. nft does NOT trace these because
+// tesseract.js is a serverExternalPackage (loaded at runtime) and the worker is a detached
+// file. If any are missing from the bundle the worker's require fails and createWorker
+// HANGS (the failure never propagates) → FUNCTION_INVOCATION_TIMEOUT. So trace the deps
+// by name. (node-fetch is intentionally omitted: the worker uses `global.fetch ||
+// require('node-fetch')`, and Vercel's Node has global.fetch, so it's never required.)
 const TESSERACT = [
   "./node_modules/tesseract.js/**",
   "./node_modules/tesseract.js-core/**",
+  "./node_modules/wasm-feature-detect/**",
+  "./node_modules/is-url/**",
+  "./node_modules/bmp-js/**",
+  "./node_modules/zlibjs/**",
+  "./node_modules/regenerator-runtime/**",
+  "./node_modules/idb-keyval/**",
   "./tessdata/**",
 ];
 
