@@ -5,29 +5,54 @@
 // weakness — cold start — into honest "warming the engine" theater instead of a surprise
 // delay on the first analysis. The /api/analyze/warm trace key in next.config.ts ships
 // the same model + native libs to this lambda.
+//
+// DIAGNOSTIC MODE: each engine is loaded under its own timeout race so neither can hang
+// the lambda silently. The response reports per-engine timing/errors so we can see on a
+// live deploy which engine misbehaves (the OCR worker is the documented landmine, §5).
 import { NextResponse } from "next/server";
-import { getClassifier, MODEL_ID, isLoaded } from "@/lib/vision/pipeline";
-import { getWorker, isOcrLoaded } from "@/lib/vision/ocr";
+import { getClassifier, MODEL_ID } from "@/lib/vision/pipeline";
+import { getWorker } from "@/lib/vision/ocr";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const alreadyWarm = isLoaded() && isOcrLoaded();
+async function timed<T>(
+  name: string,
+  p: Promise<T>,
+  ms: number,
+): Promise<{ name: string; ok: boolean; ms: number; error?: string }> {
+  const t0 = performance.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    // Load both in parallel; the classifier load dominates (~84MB weights).
-    await Promise.all([getClassifier(), getWorker()]);
-    return NextResponse.json({
-      ready: true,
-      model: MODEL_ID,
-      wasWarm: alreadyWarm,
-    });
+    await Promise.race([
+      p,
+      new Promise((_, rej) => {
+        timer = setTimeout(() => rej(new Error(`timeout after ${ms}ms`)), ms);
+      }),
+    ]);
+    return { name, ok: true, ms: Math.round(performance.now() - t0) };
   } catch (err) {
-    console.error("[warm] engine load failed:", err);
-    return NextResponse.json(
-      { ready: false, error: "warm-up failed" },
-      { status: 503 },
-    );
+    return {
+      name,
+      ok: false,
+      ms: Math.round(performance.now() - t0),
+      error: err instanceof Error ? err.message : String(err),
+    };
+  } finally {
+    if (timer) clearTimeout(timer);
   }
+}
+
+export async function GET() {
+  const classify = await timed("classifier", getClassifier(), 45_000);
+  console.log("[warm] classifier:", JSON.stringify(classify));
+  const ocr = await timed("ocr-worker", getWorker(), 12_000);
+  console.log("[warm] ocr-worker:", JSON.stringify(ocr));
+
+  const ready = classify.ok && ocr.ok;
+  return NextResponse.json(
+    { ready, model: MODEL_ID, classify, ocr },
+    { status: ready ? 200 : 207 },
+  );
 }
