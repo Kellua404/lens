@@ -2,7 +2,7 @@
 
 > Drop an image → classification + OCR + palette, every model self-hosted. No Vision API. Next.js + ONNX + Tesseract.
 
-**[Live demo](https://lens-pied-ten.vercel.app)** · part of [my portfolio](https://portfolio-delta-snowy-rw5w2y5pf8.vercel.app)
+**[Live demo](https://lens.ayoubalkak.com)** · part of [my portfolio](https://ayoubalkak.com)
 
 ![Lens](docs/poster.jpg)
 
