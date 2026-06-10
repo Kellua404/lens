@@ -1,5 +1,11 @@
 # Lens — see what the machine sees
 
+> Drop an image → classification + OCR + palette, every model self-hosted. No Vision API. Next.js + ONNX + Tesseract.
+
+**[Live demo](https://lens-pied-ten.vercel.app)** · part of [my portfolio](https://portfolio-delta-snowy-rw5w2y5pf8.vercel.app)
+
+![Lens](docs/poster.jpg)
+
 Drop in an image and watch real vision models read it, all running **inside one Vercel
 serverless function** — no third-party Vision API, no API key, **$0**:
 
@@ -86,7 +92,7 @@ filesystem is read-only except `/tmp`**. The fixes live in `lib/vision/ocr.ts`:
 1. Commit. `.gitignore` excludes `/models` (the 84 MB weight exceeds GitHub's 100 MB/file
    limit — it's re-fetched at build); `./tessdata/eng.traineddata.gz` **is** committed.
    No secrets in this repo by design.
-2. Push to a private repo and import to Vercel. The build runs the vendoring scripts +
+2. Push to GitHub and import to Vercel. The build runs the vendoring scripts +
    `next build` automatically.
 3. Deploy with `--build-env VERCEL_ANALYZE_BUILD_OUTPUT=1` and **confirm `/api/analyze` <
    250 MB**. Smoke-test the live URL with a photo that has text.
