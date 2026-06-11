@@ -7,7 +7,7 @@
 ![Lens](docs/poster.jpg)
 
 Drop in an image and watch real vision models read it, all running **inside one Vercel
-serverless function** — no third-party Vision API, no API key, **$0**:
+serverless function** — no third-party Vision API, no API key:
 
 - **Classify** — a real ONNX vision transformer (`Xenova/vit-base-patch16-224`, ImageNet-1k)
   running via `@huggingface/transformers` on CPU, returning a ranked top-k with confidence.
@@ -16,7 +16,7 @@ serverless function** — no third-party Vision API, no API key, **$0**:
 - **Palette** — the dominant colors, quantized straight from the real pixels (`sharp`).
 
 A live **telemetry** strip proves it: model id, classify ms, OCR ms, dimensions, top-1
-confidence, word count — and the honest fact that it all ran server-side for $0.
+confidence, word count — and the honest fact that it all ran entirely server-side.
 
 ## Stack
 
